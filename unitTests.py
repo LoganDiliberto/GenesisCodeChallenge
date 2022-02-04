@@ -12,7 +12,6 @@ class TestShamir(unittest.TestCase):
         pubKey, privKey = genesisCodeChallenge.load_keys([2,5], 5)
 
         message = "Random String"
-        #input('Enter a message: ')
 
         ciphertext = genesisCodeChallenge.encrypt(message, pubKey)
         plaintext = genesisCodeChallenge.decrypt(ciphertext, privKey)

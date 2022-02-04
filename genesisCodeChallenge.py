@@ -3,18 +3,18 @@ from sslib import shamir
 
 #Generates an RSA key pair then shards it using shamir needing n of k shards to reform
 def generate_keys(n, k):
-    (pubKey, privKey) = rsa.newkeys(512)
-    with open('CodeChallenge/keys/Public.txt', 'wb') as f:
+    (pubKey, privKey) = rsa.newkeys(2048)
+    with open('keys/Public.txt', 'wb') as f:
         f.write(pubKey.save_pkcs1('PEM'))
 
     toShards(privKey,n,k)
     #return pubKey, privKey
 
 def load_keys(n,k):
-    with open ('CodeChallenge/keys/Public.txt', 'rb') as f:
+    with open ('keys/Public.txt', 'rb') as f:
         pubKey = rsa.PublicKey.load_pkcs1(f.read())
 
-    with open ('CodeChallenge/keys/prime_mod.txt', 'r') as f:
+    with open ('keys/prime_mod.txt', 'r') as f:
         prime_mod = f.read()
 
     dict = {}
@@ -23,7 +23,7 @@ def load_keys(n,k):
     shards = []
 
     for shar in n:
-        with open ('CodeChallenge/keys/Shard[' + str(shar-1) +'].txt', 'r') as f:
+        with open ('keys/Shard[' + str(shar-1) +'].txt', 'r') as f:
             shards.append(str(f.read()))
     
     dict['shares'] = shards
@@ -52,11 +52,11 @@ def toShards(key, n, k):
     required_shares = n
     prime_mod = data.get("prime_mod")
 
-    with open('CodeChallenge/keys/prime_mod.txt', 'w') as f:
+    with open('keys/prime_mod.txt', 'w') as f:
         f.write(str(prime_mod))
 
     for x in range(k):
-        with open('CodeChallenge/keys/Shard[' + str(x) +'].txt', 'w') as f:
+        with open('keys/Shard[' + str(x) +'].txt', 'w') as f:
             f.write(str(shards[x]))
     
     return n,k
@@ -66,16 +66,30 @@ def fromShards(d):
     data = d
     return shamir.recover_secret(shamir.from_base64(data)).decode('ascii')
 
-generate_keys(2,5)
-pubKey, privKey = load_keys([2,5], 5)
+if __name__ == '__main__':
+    print("Welcome to sharding RSA private keys")
+    message = input('Enter a message: ')
+    n = 10
+    k = 1
+    while(n > k):
+        k = input("Please enter the number of shards the private key should be split into: ")
+        n = input("Please enter the number of shards it should take to reconstruct the private key: ")
 
-message = "Random String"
-#input('Enter a message: ')
+    shardList = []
+    while (len(shardList) < int(n)):
+        shardList = input("Please enter a list of which shards should be used to reconstruct the private key (Example: 2,5): ").split(",")
 
-ciphertext = encrypt(message, pubKey)
-plaintext = decrypt(ciphertext, privKey)
+    desired_array = [int(numeric_string) for numeric_string in shardList]
 
-if plaintext:
-    print(f'Plain text: {plaintext}')
-else:
-    print("Message failed to decrypt")
+    print(desired_array)
+
+    generate_keys(int(n),int(k))
+    pubKey, privKey = load_keys(desired_array, int(k))
+
+    ciphertext = encrypt(message, pubKey)
+    plaintext = decrypt(ciphertext, privKey)
+
+    if plaintext:
+        print(f'Plain text: {plaintext}')
+    else:
+        print("Message failed to decrypt")
