@@ -1,0 +1,2 @@
+# GenesisCodeChallenge
+ In any language of your choice, write a (command line interface) CLI program that creates an RSA key pair and shards (breaks up into pieces) the private key into k of n pieces using Shamir's secret sharing algorithm. Use any library you can find to implement the RSA and Shamir algorithms. The app should be able to re-create the private key if 2 of n Shamir shares are presented.
