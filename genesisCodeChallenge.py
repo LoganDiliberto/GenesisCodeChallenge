@@ -8,8 +8,9 @@ def generate_keys(n, k):
         f.write(pubKey.save_pkcs1('PEM'))
 
     toShards(privKey,n,k)
-    #return pubKey, privKey
 
+#Loads public from file
+#Loads private key using n shards
 def load_keys(n,k):
     with open ('keys/Public.txt', 'rb') as f:
         pubKey = rsa.PublicKey.load_pkcs1(f.read())
@@ -35,9 +36,11 @@ def load_keys(n,k):
     privKey = rsa.PrivateKey(int(privKey[0]),int(privKey[1]),int(privKey[2]),int(privKey[3]),int(privKey[4]))
     return pubKey, privKey
 
+#Encrypts message using public key provided
 def encrypt(msg, key):  
     return rsa.encrypt(msg.encode('ascii'), key)
 
+#Decrypts the ciphertext using private key provided
 def decrypt(ciphertext, key):
     try:
         return rsa.decrypt(ciphertext, key).decode('ascii')
@@ -45,7 +48,6 @@ def decrypt(ciphertext, key):
         return False
 
 #Splits private keys into shards and stores them in files
-#This currently splits a given keys
 def toShards(key, n, k):
     data = shamir.to_base64(shamir.split_secret(str(key).encode('ascii'), n, k))
     shards = data.get("shares")
@@ -61,7 +63,7 @@ def toShards(key, n, k):
     
     return n,k
 
-#Returns the private key
+#Returns the private key using a provided data dictionary
 def fromShards(d):
     data = d
     return shamir.recover_secret(shamir.from_base64(data)).decode('ascii')
